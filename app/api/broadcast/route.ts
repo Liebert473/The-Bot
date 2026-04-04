@@ -136,12 +136,22 @@ export async function GET(request: Request) {
     }
   }
 
-  return Response.json({
+  const body = {
     category,
     users: rows.length,
     sent,
     failed,
     deactivated,
     errors: errors.slice(0, 20),
-  });
+    hint:
+      rows.length === 0
+        ? "No active users. Telegram must POST /api/webhook on /start (use production URL + correct TELEGRAM_WEBHOOK_SECRET if set). Commands /start@YourBot are supported."
+        : undefined,
+  };
+
+  if (rows.length === 0) {
+    console.warn("[broadcast] zero active users — skipping Gemini/Telegram");
+  }
+
+  return Response.json(body);
 }

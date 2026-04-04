@@ -4,6 +4,7 @@ import {
   isTelegramForbidden,
   type TelegramUpdate,
 } from "@/lib/telegram";
+import { parseTelegramCommand } from "@/lib/telegram-commands";
 import { upsertUserActive, setUserInactive } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
@@ -37,11 +38,22 @@ export async function POST(request: Request) {
 
   const chatId = msg.chat.id;
   const text = msg.text.trim();
-  const token = getToken();
-  const supabase = createAdminClient();
+  const cmd = parseTelegramCommand(text);
 
-  const lower = text.toLowerCase();
-  if (lower === "/start") {
+  if (!cmd) {
+    return new Response("OK", { status: 200 });
+  }
+
+  const token = getToken();
+  let supabase: ReturnType<typeof createAdminClient>;
+  try {
+    supabase = createAdminClient();
+  } catch (e) {
+    console.error("[webhook] Supabase env misconfiguration", e);
+    return new Response("Server Misconfiguration", { status: 500 });
+  }
+
+  if (cmd === "start") {
     try {
       await upsertUserActive(supabase, chatId, true);
       const result = await sendTelegramMessage(
@@ -53,27 +65,25 @@ export async function POST(request: Request) {
         await setUserInactive(supabase, chatId);
       }
     } catch (e) {
-      console.error("[webhook] /start", e);
+      console.error("[webhook] /start failed", e);
+      return new Response("Internal Error", { status: 500 });
     }
     return new Response("OK", { status: 200 });
   }
 
-  if (lower === "/stop") {
-    try {
+  try {
+    await setUserInactive(supabase, chatId);
+    const result = await sendTelegramMessage(
+      token,
+      chatId,
+      "Acknowledged. Broadcasts paused. /start when you want the signal again.",
+    );
+    if (isTelegramForbidden(result)) {
       await setUserInactive(supabase, chatId);
-      const result = await sendTelegramMessage(
-        token,
-        chatId,
-        "Acknowledged. Broadcasts paused. /start when you want the signal again.",
-      );
-      if (isTelegramForbidden(result)) {
-        await setUserInactive(supabase, chatId);
-      }
-    } catch (e) {
-      console.error("[webhook] /stop", e);
     }
-    return new Response("OK", { status: 200 });
+  } catch (e) {
+    console.error("[webhook] /stop failed", e);
+    return new Response("Internal Error", { status: 500 });
   }
-
   return new Response("OK", { status: 200 });
 }

@@ -38,8 +38,15 @@ export default function Home() {
             <code className="text-amber-200/90">TELEGRAM_WEBHOOK_SECRET</code>.
           </p>
           <p className="text-zinc-500 text-xs">
-            Users: <code className="text-zinc-400">/start</code> to subscribe,{" "}
-            <code className="text-zinc-400">/stop</code> to pause.
+            Users: <code className="text-zinc-400">/start</code> (or{" "}
+            <code className="text-zinc-400">/start@YourBot</code>) to subscribe. No
+            website login — rows appear only after Telegram hits your deployed{" "}
+            <code className="text-zinc-400">/api/webhook</code>.
+          </p>
+          <p className="text-zinc-500 text-xs mt-2">
+            Cron <code className="text-zinc-400">200</code> with{" "}
+            <code className="text-zinc-400">users: 0</code> means no active subscribers
+            yet (no Gemini/Telegram work). Check the JSON body in Vercel logs.
           </p>
         </div>
         <div>
