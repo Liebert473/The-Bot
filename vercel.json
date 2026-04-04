@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/broadcast?category=Filter",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/broadcast?category=Momentum",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/broadcast?category=Perspective",
+      "schedule": "0 21 * * *"
+    }
+  ]
+}
