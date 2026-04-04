@@ -36,7 +36,7 @@ async function deliverToUser(
   while (attempt < MAX_ATTEMPTS) {
     const retryHint =
       attempt > 0
-        ? `Your previous output matched an existing fingerprint for this user. Change structure, metaphor, and core imperative completely (attempt ${attempt + 1}).`
+        ? `Your previous output matched an existing fingerprint for this user. Change structure, metaphor, and core imperative completely (attempt ${attempt + 1}). Keep valid Telegram HTML only (<b>, <i>, <code>, etc.); escape & < > in plain text as entities.`
         : undefined;
 
     const { text, contentHash } = await generatePatternInterrupt({
@@ -52,7 +52,9 @@ async function deliverToUser(
       continue;
     }
 
-    const sent = await sendTelegramMessage(token, telegramChatId, text);
+    const sent = await sendTelegramMessage(token, telegramChatId, text, {
+      parseMode: "HTML",
+    });
     if (isTelegramForbidden(sent)) {
       await setUserInactive(supabase, telegramChatId);
       return { ok: false, reason: "forbidden" };

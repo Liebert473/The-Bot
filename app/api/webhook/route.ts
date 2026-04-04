@@ -68,7 +68,8 @@ export async function POST(request: Request) {
       const result = await sendTelegramMessage(
         token,
         chatId,
-        "Synthesis online. Pattern interrupts are armed. Send /stop to disengage.",
+        "<b>Synthesis online.</b>\n\nPattern interrupts are armed.\n\nSend /stop to disengage when you want silence.",
+        { parseMode: "HTML" },
       );
       if (isTelegramForbidden(result)) {
         await setUserInactive(supabase, chatId);
@@ -85,7 +86,8 @@ export async function POST(request: Request) {
     const result = await sendTelegramMessage(
       token,
       chatId,
-      "Acknowledged. Broadcasts paused. /start when you want the signal again.",
+      "<b>Acknowledged.</b>\n\nBroadcasts paused.\n\nSend /start when you want the signal again.",
+      { parseMode: "HTML" },
     );
     if (isTelegramForbidden(result)) {
       await setUserInactive(supabase, chatId);

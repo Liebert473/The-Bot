@@ -43,6 +43,21 @@ export default function Home() {
             Supabase.
           </p>
           <p className="text-zinc-500 text-xs mt-2">
+            Register the webhook from your machine (replace{" "}
+            <code className="text-zinc-400">BOT_TOKEN</code> and{" "}
+            <code className="text-zinc-400">SECRET</code> with real values —{" "}
+            <span className="text-zinc-200">do not type</span>{" "}
+            <code className="text-zinc-400">&lt;</code> or{" "}
+            <code className="text-zinc-400">&gt;</code>; in bash,{" "}
+            <code className="text-zinc-400">&lt;</code> means “read from file” and
+            breaks <code className="text-zinc-400">curl</code>):
+          </p>
+          <pre className="text-[11px] leading-snug mt-1 p-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 overflow-x-auto whitespace-pre-wrap break-all">
+            {`curl -sS "https://api.telegram.org/botBOT_TOKEN/setWebhook" \\
+  -F "url=https://YOUR_VERCEL_DOMAIN/api/webhook" \\
+  -F "secret_token=SECRET"`}
+          </pre>
+          <p className="text-zinc-500 text-xs mt-2">
             After deploy, call{" "}
             <code className="text-zinc-400 break-all">
               GET /api/health/bot
