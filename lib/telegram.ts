@@ -1,5 +1,10 @@
 const TELEGRAM_API = "https://api.telegram.org";
 
+/** Hard limit per Bot API message (UTF-16 code units). */
+const TELEGRAM_HARD_LIMIT = 4096;
+/** Stay under limit so HTML entities / edge cases do not overflow. */
+const CHUNK_SAFE = 3800;
+
 export type TelegramSendResult =
   | { ok: true; data: unknown }
   | { ok: false; errorCode?: number; description?: string };
@@ -8,6 +13,32 @@ export type SendMessageOptions = {
   /** Telegram Bot API HTML mode (subset of tags). */
   parseMode?: "HTML";
 };
+
+/** Split long text into chunks Telegram will accept (paragraph / line / word aware). */
+export function chunkForTelegram(text: string): string[] {
+  const t = text.trim();
+  if (t.length <= TELEGRAM_HARD_LIMIT) return [t];
+
+  const chunks: string[] = [];
+  let start = 0;
+  while (start < t.length) {
+    if (start + TELEGRAM_HARD_LIMIT >= t.length) {
+      chunks.push(t.slice(start).trim());
+      break;
+    }
+    const windowEnd = start + CHUNK_SAFE;
+    const window = t.slice(start, windowEnd);
+    let rel = window.lastIndexOf("\n\n");
+    if (rel < CHUNK_SAFE / 3) rel = window.lastIndexOf("\n");
+    if (rel < CHUNK_SAFE / 3) rel = window.lastIndexOf(" ");
+    const take = rel > 0 ? rel : CHUNK_SAFE;
+    const piece = t.slice(start, start + take).trim();
+    if (piece) chunks.push(piece);
+    start += take;
+    while (start < t.length && /\s/.test(t[start]!)) start++;
+  }
+  return chunks.filter((c) => c.length > 0);
+}
 
 /** Strip tags / entities for fallback when HTML is rejected. */
 function htmlToPlainFallback(html: string): string {
@@ -43,7 +74,7 @@ async function postSendMessage(
   };
 }
 
-export async function sendTelegramMessage(
+async function sendOne(
   token: string,
   chatId: number,
   text: string,
@@ -96,6 +127,23 @@ export async function sendTelegramMessage(
     errorCode: data.error_code,
     description: data.description,
   };
+}
+
+export async function sendTelegramMessage(
+  token: string,
+  chatId: number,
+  text: string,
+  options?: SendMessageOptions,
+): Promise<TelegramSendResult> {
+  const chunks = chunkForTelegram(text);
+  let last: TelegramSendResult = { ok: true, data: null };
+
+  for (const chunk of chunks) {
+    last = await sendOne(token, chatId, chunk, options);
+    if (!last.ok) return last;
+  }
+
+  return last;
 }
 
 export function isTelegramForbidden(result: TelegramSendResult): boolean {

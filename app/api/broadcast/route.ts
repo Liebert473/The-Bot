@@ -36,7 +36,7 @@ async function deliverToUser(
   while (attempt < MAX_ATTEMPTS) {
     const retryHint =
       attempt > 0
-        ? `Your previous output matched an existing fingerprint for this user. Change structure, metaphor, and core imperative completely (attempt ${attempt + 1}). Keep valid Telegram HTML only (<b>, <i>, <code>, etc.); escape & < > in plain text as entities.`
+        ? `New hook, new feeling, new ending — do not recycle the last script (attempt ${attempt + 1}). Same rules: simple words, personal "you," valid Telegram HTML with closed tags.`
         : undefined;
 
     const { text, contentHash } = await generatePatternInterrupt({
