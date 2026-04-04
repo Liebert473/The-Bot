@@ -1,4 +1,6 @@
+import { verifyCronSecret } from "@/lib/cron-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { telegramChatIdToDb } from "@/lib/telegram-chat-id";
 import { generatePatternInterrupt } from "@/lib/synthesis/generate-message";
 import { sendTelegramMessage, isTelegramForbidden } from "@/lib/telegram";
 import { setUserInactive } from "@/lib/users";
@@ -9,13 +11,6 @@ export const maxDuration = 60;
 
 const MAX_ATTEMPTS = 5;
 
-function authorizeCron(request: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const auth = request.headers.get("authorization");
-  return auth === `Bearer ${secret}`;
-}
-
 async function hashExistsForUser(
   supabase: ReturnType<typeof createAdminClient>,
   telegramChatId: number,
@@ -24,7 +19,7 @@ async function hashExistsForUser(
   const { data, error } = await supabase
     .from("messages")
     .select("id")
-    .eq("telegram_chat_id", telegramChatId)
+    .eq("telegram_chat_id", telegramChatIdToDb(telegramChatId))
     .eq("content_hash", contentHash)
     .maybeSingle();
   if (error) throw error;
@@ -70,7 +65,7 @@ async function deliverToUser(
     }
 
     const { error: insertError } = await supabase.from("messages").insert({
-      telegram_chat_id: telegramChatId,
+      telegram_chat_id: telegramChatIdToDb(telegramChatId),
       category,
       message_text: text,
       content_hash: contentHash,
@@ -89,7 +84,7 @@ async function deliverToUser(
 }
 
 export async function GET(request: Request) {
-  if (!authorizeCron(request)) {
+  if (!verifyCronSecret(request)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

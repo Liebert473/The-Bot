@@ -35,7 +35,24 @@ export default function Home() {
             </code>
             . Optional: set{" "}
             <code className="text-amber-200/90">secret_token</code> matching{" "}
-            <code className="text-amber-200/90">TELEGRAM_WEBHOOK_SECRET</code>.
+            <code className="text-amber-200/90">TELEGRAM_WEBHOOK_SECRET</code>{" "}
+            must match Telegram{" "}
+            <code className="text-amber-200/90">secret_token</code> exactly. If
+            it is set in Vercel but not on the webhook, Telegram gets{" "}
+            <code className="text-zinc-400">401</code> and nothing is written to
+            Supabase.
+          </p>
+          <p className="text-zinc-500 text-xs mt-2">
+            After deploy, call{" "}
+            <code className="text-zinc-400 break-all">
+              GET /api/health/bot
+            </code>{" "}
+            with{" "}
+            <code className="text-zinc-400">
+              Authorization: Bearer &lt;CRON_SECRET&gt;
+            </code>{" "}
+            to see Telegram&apos;s webhook URL, last delivery error, and user
+            counts.
           </p>
           <p className="text-zinc-500 text-xs">
             Users: <code className="text-zinc-400">/start</code> (or{" "}

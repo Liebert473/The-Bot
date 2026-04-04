@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { loadKnowledgeBase } from "@/lib/knowledge";
 import type { MessageCategory } from "@/lib/types";
 import { hashMessage } from "@/lib/hash-message";
+import { telegramChatIdToDb } from "@/lib/telegram-chat-id";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const MODEL_ID = "gemini-2.5-flash";
@@ -45,7 +46,7 @@ export async function fetchMessageHistory(
   const { data, error } = await supabase
     .from("messages")
     .select("message_text, category, sent_at")
-    .eq("telegram_chat_id", telegramChatId)
+    .eq("telegram_chat_id", telegramChatIdToDb(telegramChatId))
     .order("sent_at", { ascending: false })
     .limit(limit);
 

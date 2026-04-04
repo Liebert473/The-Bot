@@ -20,7 +20,15 @@ export async function POST(request: Request) {
   if (secret) {
     const header = request.headers.get("x-telegram-bot-api-secret-token");
     if (header !== secret) {
-      return new Response("Unauthorized", { status: 401 });
+      console.warn(
+        "[webhook] 401 webhook secret mismatch or missing header. " +
+          "If TELEGRAM_WEBHOOK_SECRET is set in Vercel, call setWebhook with the same secret_token. " +
+          `Header present: ${Boolean(header)}`,
+      );
+      return Response.json(
+        { error: "webhook_secret_mismatch" },
+        { status: 401 },
+      );
     }
   }
 
@@ -56,6 +64,7 @@ export async function POST(request: Request) {
   if (cmd === "start") {
     try {
       await upsertUserActive(supabase, chatId, true);
+      console.info("[webhook] /start registered user", { chatId });
       const result = await sendTelegramMessage(
         token,
         chatId,
