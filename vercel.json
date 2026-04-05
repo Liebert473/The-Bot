@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/broadcast?category=Filter",
-      "schedule": "0 8 * * *"
+      "schedule": "30 1 * * *"
     },
     {
       "path": "/api/broadcast?category=Momentum",
-      "schedule": "0 14 * * *"
+      "schedule": "30 7 * * *"
     },
     {
       "path": "/api/broadcast?category=Perspective",
-      "schedule": "0 21 * * *"
+      "schedule": "30 14 * * *"
     }
   ]
 }

@@ -84,11 +84,18 @@ export default function Home() {
         <div>
           <h2 className="text-zinc-100 font-medium mb-2">4. Cron</h2>
           <p>
-            <code className="text-amber-200/90">vercel.json</code> runs
-            broadcasts at 08:00, 14:00, and 21:00{" "}
-            <span className="text-zinc-500">(UTC on Vercel — adjust if needed)</span>
-            . Set the same <code className="text-amber-200/90">CRON_SECRET</code>{" "}
-            in Vercel; cron requests must send{" "}
+            <code className="text-amber-200/90">vercel.json</code> schedules are
+            always in{" "}
+            <span className="text-zinc-400">UTC</span> on Vercel; these map to{" "}
+            <span className="text-zinc-400">
+              Myanmar Time (MMT, UTC+6:30)
+            </span>{" "}
+            at <code className="text-amber-200/90">08:00</code>,{" "}
+            <code className="text-amber-200/90">14:00</code>, and{" "}
+            <code className="text-amber-200/90">21:00</code> for Filter, Momentum,
+            and Perspective. Set the same{" "}
+            <code className="text-amber-200/90">CRON_SECRET</code> in Vercel; cron
+            requests must send{" "}
             <code className="text-amber-200/90">
               Authorization: Bearer &lt;CRON_SECRET&gt;
             </code>
